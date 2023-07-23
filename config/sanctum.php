@@ -20,8 +20,7 @@ return [
         'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
         Sanctum::currentApplicationUrlWithPort()
     ))),
-    'token_lifetime' => env('SANCTUM_STATEFUL_TTL', 60 * 60 * 24),
-    'refresh_token_lifetime' => env('SANCTUM_STATEFUL_REFRESH_TTL', 60 * 60 * 24),
+
 
     /*
     |--------------------------------------------------------------------------
@@ -48,7 +47,7 @@ return [
     |
     */
 
-    'expiration' => null,
+    'expiration' => 60 * 60,
 
     /*
     |--------------------------------------------------------------------------

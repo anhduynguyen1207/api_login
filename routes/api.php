@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TodoController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -24,3 +25,6 @@ Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logo
 Route::middleware('auth:sanctum')->post('/refresh-token', [AuthController::class, 'refreshToken']);
 
 Route::middleware('auth:sanctum')->get('/getAll', [AuthController::class, 'getAll']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('/todos', TodoController::class);
+});
