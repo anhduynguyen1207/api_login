@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -41,8 +42,8 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
-        $token = $user->createToken('auth-token')->plainTextToken;
-
+        $token = $user->createToken('access-token')->plainTextToken;
+        // $refreshToken = $user->createToken('refresh-token')->plainTextToken;
         return response()->json(['message' => 'Logged in successfully', 'token' => $token]);
     }
 
@@ -55,11 +56,24 @@ class AuthController extends Controller
 
     public function refreshToken(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
 
-        $token = $request->user()->createToken('auth-token')->plainTextToken;
+        if (empty($token = $request->header('Authorization'))) {
+            return response()->json(['message' => 'Token is invalid'], 422);
+        }
 
-        return response()->json(['message' => 'Token refreshed successfully', 'token' => $token]);
+        $token = explode('Bearer ', $token);
+        if (empty($token[1]) || empty($token = PersonalAccessToken::findToken($token[1]))) {
+            return response()->json(['message' => 'Token is invalid'], 422);
+        }
+
+        if (!$token->tokenable instanceof User) {
+            return response()->json(['message' => 'Token is invalid'], 422);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => ['access_token' => $token->tokenable->createToken('access-token')->plainTextToken]
+        ]);
     }
     public function getAll()
     {

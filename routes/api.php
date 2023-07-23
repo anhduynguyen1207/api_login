@@ -28,3 +28,6 @@ Route::middleware('auth:sanctum')->get('/getAll', [AuthController::class, 'getAl
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/todos', TodoController::class);
 });
+Route::middleware('refresh.token')->group(function () {
+    Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
+});
