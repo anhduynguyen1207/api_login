@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
 use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Support\Carbon;
 
 class AuthController extends Controller
 {
@@ -37,14 +38,14 @@ class AuthController extends Controller
 
         if (!Auth::attempt($request->only('email', 'password'))) {
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+                'message' => ['Username or password are incorrect.Try again!!!'],
             ]);
         }
-
+        $expiresAt = Carbon::now()->addMinutes();
         $user = Auth::user();
-        $token = $user->createToken('access-token')->plainTextToken;
+        $token = $user->createToken('access-token', ["*"], $expiresAt)->plainTextToken;
         // $refreshToken = $user->createToken('refresh-token')->plainTextToken;
-        return response()->json(['message' => 'Logged in successfully', 'token' => $token]);
+        return response()->json(['message' => 'Logged in successfully', 'token' => $token,'expires' => $expiresAt]);
     }
 
     public function logout(Request $request)
@@ -69,10 +70,10 @@ class AuthController extends Controller
         if (!$token->tokenable instanceof User) {
             return response()->json(['message' => 'Token is invalid'], 422);
         }
-
+        $expiresAt = Carbon::now()->addMinutes();
         return response()->json([
             'status' => 'success',
-            'data' => ['access_token' => $token->tokenable->createToken('access-token')->plainTextToken]
+            'data' => ['access_token' => $token->tokenable->createToken('access-token', ["*"], $expiresAt)->plainTextToken,'expires' => $expiresAt]
         ]);
     }
     public function getAll()
